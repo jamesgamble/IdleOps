@@ -1,0 +1,14 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+
+# Editor and operating system files
+.DS_Store
+Thumbs.db
+*.swp
+
+# Generated dependencies, output and coverage
+node_modules/
+dist/
+coverage/

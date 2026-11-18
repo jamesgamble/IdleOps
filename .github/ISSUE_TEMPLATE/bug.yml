@@ -1,0 +1,24 @@
+name: Bug report
+description: Report reproducible unexpected behavior.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the browser, version, viewport, and release or commit when available.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior and verification
+      description: Describe the result that would demonstrate a fix.
+    validations:
+      required: true

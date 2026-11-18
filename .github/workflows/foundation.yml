@@ -1,0 +1,51 @@
+name: Repository foundation
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    name: Foundation checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Check required files and local Markdown links
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          required = [
+              "README.md", "AGENTS.md", "CONTRIBUTING.md", "docs/product.md",
+              ".github/PULL_REQUEST_TEMPLATE.md", ".github/dependabot.yml",
+              ".github/ISSUE_TEMPLATE/bug.yml", ".github/ISSUE_TEMPLATE/feature.yml",
+          ]
+          errors = []
+          for filename in required:
+              path = Path(filename)
+              if not path.is_file() or not path.read_text().strip():
+                  errors.append(f"Missing or empty file: {path}")
+          for path in (Path(name) for name in required if name.endswith(".md")):
+              if not path.is_file():
+                  continue
+              for target in re.findall(r"\[[^\]]+\]\(([^()\s]+)\)", path.read_text()):
+                  if target.startswith(("#", "//")) or re.match(r"[a-zA-Z][\w+.-]*:", target):
+                      continue
+                  local = target.partition("#")[0]
+                  destination = Path(local[1:]) if local.startswith("/") else path.parent / local
+                  if not destination.exists():
+                      errors.append(f"{path}: missing link target {target}")
+          if errors:
+              sys.exit("\n".join(errors))
+          PY
+      - name: Check YAML syntax
+        run: ruby -ryaml -e 'Dir[".github/**/*.{yaml,yml}"].each { |file| YAML.parse_file(file) }'

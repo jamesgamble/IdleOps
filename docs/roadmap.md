@@ -1,6 +1,6 @@
 # Progressive MVP development plan
 
-**Planning complete; implementation awaits the Product Owner’s go-ahead.** The [approved handoff](design-handoff-v1.md) is the scope baseline. The eight stages are integration checkpoints within one MVP milestone. Priorities sequence work: P0 marks a dependency or release gate; P1 is also required for release. Do not dispatch an issue until its prerequisites are merged. Keep one implementation PR active initially and use measured throughput from the first three assignments before forecasting a date.
+**The Product Owner has authorized the static shell in #5.** The [approved handoff](design-handoff-v1.md) is the scope baseline. The eight stages are integration checkpoints within one MVP milestone. Priorities sequence work: P0 marks a dependency or release gate; P1 is also required for release. Do not dispatch an issue until its prerequisites are merged. Keep one implementation PR active initially and use measured throughput from the first three assignments before forecasting a date.
 
 ## Architecture recommendation
 
@@ -50,7 +50,7 @@ Then complete #8 before shipping the first dashboard slice. Networking behavior 
 
 ## Development and verification workflow
 
-Work moves a dependency-clear issue from Backlog to Ready at kickoff. Codex branches from current main (e.g. `feat/5-static-shell`) and opens one focused PR with `Closes #5` or the appropriate issue. Include exact verification commands/results, failures and limitations; for UI work attach normal/incident screenshots with viewport and browser. Do not merge unfinished slices as release-ready features. Work reviews the diff and acceptance evidence, requests fixes, verifies behavior in Testing, then merges only after protected checks pass. Maintain existing Foundation checks; add type, lint/format, build, unit and browser checks with #5, and require new checks only after they run successfully. Exercise seeded adverse cases and use clock advancement for long intervals; retain a real elapsed-time soak for #19. No app or deployment task has been dispatched by this plan.
+Work moves a dependency-clear issue from Backlog to Ready at kickoff. Codex branches from current main (e.g. `feat/5-static-shell`) and opens one focused PR with `Closes #5` or the appropriate issue. Include exact verification commands/results, failures and limitations; for UI work attach normal/incident screenshots with viewport and browser. Do not merge unfinished slices as release-ready features. Work reviews the diff and acceptance evidence, requests fixes, verifies behavior in Testing, then merges only after protected checks pass. Maintain existing Foundation checks; add type, lint/format, build, unit and browser checks with #5, and require new checks only after they run successfully. Exercise seeded adverse cases and use clock advancement for long intervals; retain a real elapsed-time soak for #19. Subsequent assignments require separate authorization.
 
 ## Subsequent releases
 

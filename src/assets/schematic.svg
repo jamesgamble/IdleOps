@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 338" fill="none"><title>Isometric compute chassis</title>
+  <defs>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#396466"/></pattern>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M0 36V0h36" stroke="#398e8b" stroke-width=".8"/></pattern>
+    <linearGradient id="face" x2="1" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#194b4e"/><stop offset="1" stop-color="#11292e"/></linearGradient>
+    <linearGradient id="edge"><stop stop-color="#90fff0"/><stop offset="1" stop-color="#398586"/></linearGradient>
+    <radialGradient id="halo"><stop stop-color="#1f7169" stop-opacity=".40"/><stop offset="1" stop-color="#0d171b" stop-opacity="0"/></radialGradient>
+    <pattern id="vents" width="7" height="6" patternUnits="userSpaceOnUse" patternTransform="skewY(24)"><path d="M1 0v6" stroke="#408c8b" stroke-width="2"/></pattern>
+    <g id="slab" stroke-linejoin="round">
+      <path d="m0 0 149 66 187-83-150-66z" fill="url(#face)" stroke="#7cd2ca"/>
+      <path d="m0 0 149 66v15L0 15z" fill="#102d32" stroke="#5ea09f"/>
+      <path d="m149 66 187-83v15L149 81z" fill="#0a2025" stroke="#49918d"/>
+      <path d="m7 6 94 42v5L7 11z" fill="url(#vents)"/>
+      <path d="m115 52 9 4m5 2 6 3m27 7 17-8m5-2 6-3" stroke="#6ef2da" stroke-width="2.6"/>
+    </g>
+    <g id="module" stroke-linejoin="round">
+      <path d="m0 0 53 23.5 82-36.5-53-23.5z" fill="#255558" stroke="#8ddfd4"/>
+      <path d="m0 0 53 23.5v31L0 31Z" fill="#17383e" stroke="#63aba9"/>
+      <path d="m53 23.5 82-36.5v31L53 54.5z" fill="#0c2228" stroke="#50928f"/>
+      <path d="m6 10 40 18v14L6 24z" fill="url(#vents)"/>
+      <path d="m62 28 43-19m-43 25 33-15m-33 21 25-11" stroke="#3d7777"/>
+      <path d="m109 9 7-3m4-2 7-3" stroke="#8ff2c8" stroke-width="2.2"/>
+      <path d="m10 0 42 18.5 62-27.5-42-18.5z" stroke="#549d99"/>
+      <path d="m22 0 32 14m-22-19 32 14m-21-19 32 14m-21-19 32 14m-21-19 32 14" stroke="#67b2aa"/>
+    </g>
+    <g id="cross" stroke="#63a5a3" stroke-width="1"><path d="M-4 0h8M0-4v8"/></g>
+  </defs>
+  <path fill="url(#dots)" opacity=".46" d="M0 0h840v338H0z"/>
+  <ellipse cx="420" cy="178" rx="330" ry="180" fill="url(#halo)"/>
+  <g transform="matrix(1 .443 1 -.443 0 172)" opacity=".46">
+    <path fill="url(#grid)" d="M40-180h430v420H40z"/>
+    <g stroke="#66bfb4" stroke-width="1.3"><path d="M0 0h40v-42h111v44h55m63 110v50h79v70h70M128-167v62h65v25h51m123 72h94v47h64"/></g>
+  </g>
+  <g opacity=".65" stroke="#458987" stroke-dasharray="3 5">
+    <path d="M245 194v43m149 11v57m187-164v77M431 89v39"/>
+    <path d="m245 233 149 66 187-83-150-66z"/>
+  </g>
+  <use href="#slab" x="245" y="200"/>
+  <use href="#slab" x="245" y="180"/>
+  <path d="m253 184 137 61m10-1 169-75" stroke="url(#edge)" stroke-width="2.4"/>
+  <g transform="translate(263 140)">
+    <use href="#module" x="85" y="-38"/>
+    <use href="#module"/>
+    <use href="#module" x="144" y="-12"/>
+    <use href="#module" x="59" y="26"/>
+  </g>
+  <g opacity=".85" stroke="#588d8b">
+    <path d="M345 103h-55l-23-22h-67m321 99h67l26-26h53m-286 85-35 22h-80" />
+    <g fill="#9be9dc"><circle cx="345" cy="103" r="2.5"/><circle cx="521" cy="180" r="2.5"/><circle cx="381" cy="239" r="2.5"/></g>
+    <path d="M190 81h5m477 73h5m-420 107h5" stroke="#82dbbd" stroke-width="3"/>
+  </g>
+  <g opacity=".65"><use href="#cross" x="135" y="117"/><use href="#cross" x="683" y="226"/><use href="#cross" x="562" y="64"/><use href="#cross" x="182" y="236"/></g>
+</svg>

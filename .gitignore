@@ -12,3 +12,7 @@ Thumbs.db
 node_modules/
 dist/
 coverage/
+
+# Browser test output and review evidence
+test-results/
+playwright-report/

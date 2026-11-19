@@ -1,3 +1,4 @@
+import { securitySummary } from "./security";
 import type { SimulationSnapshot } from "./session";
 import type { Sample } from "./telemetry";
 
@@ -17,9 +18,7 @@ export function dashboard(snapshot: SimulationSnapshot) {
   const { catalog, conditions, telemetry, journal } = snapshot;
   const resources = new Map(catalog.resources.map((r) => [r.id, r]));
   const clouds = catalog.resources.filter((r) => r.cloudId);
-  const firewalls = catalog.resources.filter(
-    (r) => r.configuration.kind === "firewall",
-  );
+  const security = securitySummary(snapshot);
   const healthy = (r: (typeof clouds)[number]) =>
     conditions.resourceHealth[r.id] === "Healthy";
   const healthyLinks = catalog.links.filter(
@@ -88,13 +87,19 @@ export function dashboard(snapshot: SimulationSnapshot) {
     },
     {
       name: "Security status",
-      value: firewalls.every(healthy) ? "Nominal" : "Attention",
+      value: security.posture,
       unit: "",
-      detail: "Firewall resource health",
-      rows: firewalls.map((r) => [
-        r.name,
-        String(conditions.resourceHealth[r.id]),
-      ]),
+      detail: "Perimeter health and active sign-in warnings",
+      rows: [
+        ...security.warnings.map((w) => [
+          resources.get(w.resourceId)?.name ?? w.resourceId,
+          w.message,
+        ]),
+        ...security.perimeter.map((r) => [
+          r.name,
+          String(conditions.resourceHealth[r.id]),
+        ]),
+      ],
     },
     {
       name: "Aggregate system activity",

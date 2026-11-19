@@ -3,18 +3,12 @@ import { Icon } from "../ui/Icon";
 import { type Route, screens } from "../ui/routes";
 import { SessionDetails } from "../ui/SessionDetails";
 import { CommandCenter } from "./CommandCenter";
+import { EventConsole } from "./EventConsole";
 import { Infrastructure } from "./Infrastructure";
 import { Networking } from "./Networking";
+import { Security } from "./Security";
 
 const placeholders = {
-  security: [
-    "Security activity",
-    "Simulated security events and alerts will appear here.",
-  ],
-  "event-console": [
-    "Event stream",
-    "The local event log and diagnostic terminal will appear here.",
-  ],
   settings: [
     "Workspace preferences",
     "Appearance, presentation, and simulation preferences will appear here.",
@@ -45,6 +39,10 @@ export function Workspace({
         <Infrastructure simulation={simulation} />
       ) : route === "networking" ? (
         <Networking simulation={simulation} />
+      ) : route === "security" ? (
+        <Security simulation={simulation} />
+      ) : route === "event-console" ? (
+        <EventConsole simulation={simulation} />
       ) : (
         <div class="workspace-grid">
           <section class="panel placeholder">

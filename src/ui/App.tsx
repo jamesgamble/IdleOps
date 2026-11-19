@@ -96,11 +96,11 @@ export function App({ simulation }: { simulation: Simulation }) {
         <div class="content" key={route}>
           <Workspace route={route} simulation={simulation} />
         </div>
-        <footer>
-          <span class="footer-brand">IdleOps</span>
-          <span>Local simulation workspace</span>
-        </footer>
       </main>
+      <footer>
+        <span class="footer-brand">IdleOps</span>
+        <span>Local simulation workspace</span>
+      </footer>
     </div>
   );
 }

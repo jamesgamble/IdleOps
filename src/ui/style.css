@@ -55,7 +55,7 @@ a {
   --rail-width: 226px;
   display: grid;
   height: 100dvh;
-  grid-template: 64px minmax(0, 1fr) / var(--rail-width) minmax(0, 1fr);
+  grid-template: 64px minmax(0, 1fr) auto / var(--rail-width) minmax(0, 1fr);
 }
 .shell.collapsed {
   --rail-width: 70px;
@@ -164,6 +164,7 @@ footer {
   padding-left: 11px;
 }
 .sidebar {
+  grid-row: 2 / -1;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -466,8 +467,8 @@ dd {
   margin-top: 16px;
 }
 footer {
+  grid-column: 2;
   gap: 12px;
-  margin-top: auto;
   padding: 12px clamp(26px, 2.6vw, 56px);
   border-top: 1px solid #1f2a2d;
   color: var(--dim);
@@ -525,7 +526,7 @@ footer {
 @media (max-width: 650px) {
   .shell {
     --rail-width: 146px;
-    grid-template-rows: 54px minmax(0, 1fr);
+    grid-template-rows: 54px minmax(0, 1fr) auto;
   }
   .sidebar {
     padding-inline: 5px;

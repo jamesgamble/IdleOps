@@ -126,14 +126,13 @@
 .ops-map {
   background: radial-gradient(ellipse at center, #142829, #0f181b);
 }
-.ops-map svg {
+.ops-map > svg {
   background-image:
     linear-gradient(#25303366 1px, transparent 1px),
     linear-gradient(90deg, #25303366 1px, transparent 1px);
   background-size: 27px 27px;
 }
-.ops-map svg,
-.dependency-map {
+.ops-map > svg {
   width: 100%;
   display: block;
   height: clamp(180px, 17vh, 270px);
@@ -141,30 +140,6 @@
 .ops-map text {
   fill: #c5dbd9;
   font: 13px var(--mono);
-}
-.dependency-map {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  gap: 10px;
-  padding: 14px;
-}
-.dependency-map strong,
-.dependency-map li {
-  border-left: 2px solid var(--cyan);
-  background: #152c2a;
-  padding: 5px 9px;
-  font: 12px var(--mono);
-}
-.dependency-map span {
-  font: 11px var(--mono);
-  color: var(--dim);
-}
-.dependency-map ul {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  gap: 5px;
 }
 .cc-caption,
 .axis {

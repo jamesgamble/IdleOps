@@ -4,11 +4,9 @@ import { type Route, screens } from "../ui/routes";
 import { SessionDetails } from "../ui/SessionDetails";
 import { CommandCenter } from "./CommandCenter";
 
+import { Infrastructure } from "./Infrastructure";
+
 const placeholders = {
-  infrastructure: [
-    "Resource inventory",
-    "The fictional resource catalog and dependency views will appear here.",
-  ],
   networking: [
     "Network topology",
     "Regional connections and simulated network paths will appear here.",
@@ -47,6 +45,8 @@ export function Workspace({
       </header>
       {route === "command-center" ? (
         <CommandCenter simulation={simulation} />
+      ) : route === "infrastructure" ? (
+        <Infrastructure simulation={simulation} />
       ) : (
         <div class="workspace-grid">
           <section class="panel placeholder">

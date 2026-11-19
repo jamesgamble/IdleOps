@@ -115,7 +115,9 @@ export interface Catalog {
 
 export interface ResourceAlert {
   readonly id: string;
-  readonly severity: "info";
+  readonly severity: import("./episodes").Severity;
+  readonly acknowledged?: boolean;
+  readonly occurrences?: number;
   readonly resourceId: ResourceId;
   readonly message: string;
 }

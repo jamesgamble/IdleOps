@@ -34,3 +34,9 @@ Each seed includes one resolved historical circuit interruption. The default see
 4. Multiply the effective resource score by its weight and divide by the sum of all resource weights. This is the resource’s contribution in enterprise score points. Their sum is the enterprise score on a 0–100 scale. Each contribution exposes operational state, own score, effective score, weight, points, and the direct limiting prerequisite when one lowered the score.
 
 For example, a failed 5,000 Mbps Tampa–Frankfurt primary with a healthy 1,000 Mbps standby gives the circuit a rating of 79. Losing both paths gives it 0. An offline shared endpoint also gives it 0. These calculations evaluate modeled connectivity. Runtime switching, incident generation, and chart rendering belong to their respective assignments.
+
+## Session incidents and logs
+
+The session snapshot exposes a journal of grouped incidents and up to 500 chronological events. A seeded application queue raises service latency and updates resource and enterprise health. Minor queues recur about every ten minutes. Larger batches recur every thirty minutes, progressing through investigation and saturation before the workers drain the queue. The simulator emits six routine events per minute plus condition changes and repeated observations. Acknowledging an active alert records the operator action without changing queue pressure.
+
+Incident timelines own immutable entries and survive console log eviction. The initial resolved circuit timeline uses the chart marker timestamps and episode ID. On a long clock jump the engine finishes any previously observed fault, reconstructs the latest 100 minutes of activity, and publishes once. Unobserved episodes in the skipped interval are omitted. All records reset with the session.

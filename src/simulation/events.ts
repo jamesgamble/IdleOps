@@ -6,13 +6,21 @@ import { circuitScenario } from "./network";
 import type { ScenarioSeed } from "./scenario";
 import { MINUTE, type Telemetry } from "./telemetry";
 
+type SecurityActivity =
+  | "authentication-success"
+  | "authentication-failure"
+  | "connection-blocked";
 interface Event {
+  readonly security?: SecurityActivity;
   readonly at: number;
   readonly resourceId: ResourceId;
   readonly severity: Severity;
   readonly message: string;
   readonly linkId?: LinkId;
   readonly incidentId?: string;
+}
+export interface LogEntry extends Event {
+  readonly sequence: number;
 }
 interface Incident {
   readonly id: string;
@@ -27,7 +35,7 @@ export interface Journal {
   readonly acknowledgedNoticeIds: readonly string[];
   readonly incidents: readonly Incident[];
   readonly active: readonly Incident[];
-  readonly logs: readonly Event[];
+  readonly logs: readonly LogEntry[];
 }
 
 export function createJournal(
@@ -36,7 +44,8 @@ export function createJournal(
   markers: Telemetry["markers"],
   notices: Conditions["alerts"],
 ) {
-  const logs: Event[] = [];
+  const logs: LogEntry[] = [];
+  let sequence = 0;
   const incidents = new Map<string, Incident>();
   const acknowledgedNoticeIds = new Set<string>();
   let current: Incident | undefined;
@@ -45,7 +54,9 @@ export function createJournal(
   const circuitId = `${seed}-live-circuit`;
   let transitionIndex = 0;
   function record(event: Event) {
-    logs.push(Object.freeze(event));
+    const entry = Object.freeze({ ...event, sequence: ++sequence });
+    logs.push(entry);
+    return entry;
   }
   function update(
     id: string,
@@ -55,8 +66,7 @@ export function createJournal(
     acknowledged = false,
   ) {
     const previous = incidents.get(id);
-    const entry = Object.freeze({ ...event, incidentId: id });
-    record(entry);
+    const entry = record({ ...event, incidentId: id });
     const incident = Object.freeze({
       id,
       resourceId: event.resourceId,
@@ -89,6 +99,13 @@ export function createJournal(
       marker.phase === "onset",
     );
   }
+  record({
+    at: start,
+    resourceId: "res-tpa-directory",
+    severity: "info",
+    security: "authentication-success",
+    message: "Directory accepted the workspace service sign-in.",
+  });
   let cursor = 0;
   let published: Journal;
   function publish() {
@@ -167,7 +184,39 @@ export function createJournal(
           );
         }
         const resource = catalog.resources[i % catalog.resources.length];
-        if (resource)
+        if (i % 6 === 1) {
+          const delayed =
+            episode &&
+            ["detected", "investigating", "critical"].includes(episode.stage);
+          record(
+            delayed
+              ? {
+                  at,
+                  resourceId: episode.resourceId,
+                  incidentId: episode.id,
+                  severity: episode.severity,
+                  security: "authentication-failure",
+                  message:
+                    "Service sign-in timed out while the application queue was delayed.",
+                }
+              : {
+                  at,
+                  resourceId: "res-tpa-directory",
+                  severity: "info",
+                  security: "authentication-success",
+                  message: "Directory accepted a service sign-in.",
+                },
+          );
+        } else if (i % 12 === 6) {
+          record({
+            at,
+            resourceId: i % 24 === 6 ? "res-tpa-fw" : "res-fra-fw",
+            severity: "info",
+            security: "connection-blocked",
+            message:
+              "Perimeter policy blocked an unapproved inter-zone connection.",
+          });
+        } else if (resource)
           record({
             at,
             resourceId: resource.id,

@@ -10,7 +10,9 @@ test("inspects shared security records, preserves paused reading and follows the
   await expect(page.getByText("Attention", { exact: true })).toBeVisible();
   const message =
     "Service sign-in timed out while the application queue was delayed.";
-  await expect(page.getByText(message, { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByRole("listitem").filter({ hasText: message }).first(),
+  ).toBeVisible();
   await page.screenshot({ path: info.outputPath("security-activity.png") });
   await page.getByRole("link", { name: "Event Console", exact: true }).click();
   const records = page.getByRole("region", { name: "Log records" });

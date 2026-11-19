@@ -99,3 +99,30 @@ test("serves six screens from a nested path and keeps one session through naviga
   expect(assets.has("script") && assets.has("stylesheet")).toBe(true);
   expect(invalid).toEqual([]);
 });
+
+test("suspends the shared browser clock when hidden and reconciles on return", async ({
+  page,
+}) => {
+  const start = new Date("2026-01-12T09:00:00Z");
+  await page.clock.install({ time: start });
+  await page.clock.pauseAt(new Date(start.getTime() + 1000));
+  await page.goto("./");
+  const uptime = page.locator(".session dd").last();
+  await page.clock.runFor(2000);
+  await expect(uptime).toHaveText("00:00:02");
+  const visibility = async (hidden: boolean) => {
+    // Headless Chromium has no user tab switch. Drive the browser visibility contract.
+    await page.evaluate((value) => {
+      Object.defineProperty(document, "hidden", { configurable: true, value });
+      document.dispatchEvent(new Event("visibilitychange"));
+    }, hidden);
+  };
+  await visibility(true);
+  await page.clock.fastForward(30 * 24 * 3600 * 1000);
+  await expect(uptime).toHaveText("00:00:02");
+  await visibility(false);
+  await page.clock.runFor(50);
+  await expect(uptime).toHaveText("720:00:02");
+  await page.clock.runFor(1000);
+  await expect(uptime).toHaveText("720:00:03");
+});

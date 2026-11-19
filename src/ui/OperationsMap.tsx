@@ -12,13 +12,14 @@ export function OperationsMap({ snapshot }: { snapshot: SimulationSnapshot }) {
     ...s,
     point: xy(s.longitude, s.latitude),
   }));
-  const links = catalog.links.flatMap((link) => {
+  const links = snapshot.telemetry.routes.geographic.flatMap((route) => {
+    const link = route.primary;
     const a = catalog.resources.find((r) => r.id === link.from),
       b = catalog.resources.find((r) => r.id === link.to);
-    if (!a || !b || a.siteId === b.siteId || link.backupFor) return [];
+    if (!a || !b) return [];
     const from = sites.find((s) => s.id === a.siteId);
     const to = sites.find((s) => s.id === b.siteId);
-    return from && to ? [{ id: link.id, from, to }] : [];
+    return from && to ? [{ id: link.id, from, to, route }] : [];
   });
   return (
     <section class="panel ops-map">
@@ -55,9 +56,21 @@ export function OperationsMap({ snapshot }: { snapshot: SimulationSnapshot }) {
               key={l.id}
               d={`M${l.from.point.join(" ")} Q ${(l.from.point[0] + l.to.point[0]) / 2} ${Math.min(l.from.point[1], l.to.point[1]) - 34} ${l.to.point.join(" ")}`}
               fill="none"
-              stroke="#40887f"
+              stroke={
+                l.route.health === "Offline"
+                  ? "var(--red)"
+                  : l.route.health === "Degraded"
+                    ? "var(--amber)"
+                    : "#40887f"
+              }
               stroke-width="1.6"
-            />
+            >
+              <title>
+                {l.id} · {l.route.health} · {l.route.selected?.id ?? "No path"}{" "}
+                · {l.route.forwardMbps.toFixed(0)} Mbps forward /{" "}
+                {l.route.reverseMbps.toFixed(0)} Mbps reverse
+              </title>
+            </path>
           ))}
           {sites.map((s) => {
             const [x, y] = s.point;

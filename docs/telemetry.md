@@ -33,10 +33,17 @@ Each seed includes one resolved historical circuit interruption. The default see
 3. Limit each resource by its weakest prerequisite, recursively. Directly wired device dependencies also use the joining circuit. For a logical circuit, take the better of the primary rating and the best usable standby rating, then limit the result by the health of both endpoint devices. A standby receives a fraction of its condition rating equal to `0.75 + 0.20 × min(1, standby capacity / primary capacity)`. These weights model the service value of reduced-capacity connectivity.
 4. Multiply the effective resource score by its weight and divide by the sum of all resource weights. This is the resource’s contribution in enterprise score points. Their sum is the enterprise score on a 0–100 scale. Each contribution exposes operational state, own score, effective score, weight, points, and the direct limiting prerequisite when one lowered the score.
 
-For example, a failed 5,000 Mbps Tampa–Frankfurt primary with a healthy 1,000 Mbps standby gives the circuit a rating of 79. Losing both paths gives it 0. An offline shared endpoint also gives it 0. These calculations evaluate modeled connectivity. Runtime switching, incident generation, and chart rendering belong to their respective assignments.
+For example, a failed 5,000 Mbps Tampa–Frankfurt primary with a healthy 1,000 Mbps standby gives the circuit a rating of 79. Losing both paths gives it 0. An offline shared endpoint also gives it 0. The live geographic map and topology data use those same catalog circuits.
 
 ## Session incidents and logs
 
 The session snapshot exposes a journal of grouped incidents and up to 500 chronological events. A seeded application queue raises service latency and updates resource and enterprise health. Minor queues recur about every ten minutes. Larger batches recur every thirty minutes, progressing through investigation and saturation before the workers drain the queue. The simulator emits six routine events per minute plus condition changes and repeated observations. Acknowledging an active alert records the operator action without changing queue pressure.
 
 Incident timelines own immutable entries and survive console log eviction. The initial resolved circuit timeline uses the chart marker timestamps and episode ID. On a long clock jump the engine finishes any previously observed fault, reconstructs the latest 100 minutes of activity, and publishes once. Unobserved episodes in the skipped interval are omitted. All records reset with the session.
+
+
+## Live circuit failover
+
+At session minute 45, the seed's primary circuit fails. The Tampa–Frankfurt scenario shifts the available traffic onto its 1,000 Mbps standby. New York–Tampa has no alternate circuit, so its traffic falls to zero, packet loss reaches 100%, and the service desk becomes critical. At minute 50 the primary returns. Queue pressure, loss and latency settle over the next five minutes. Acknowledgment leaves the route and service condition intact. Chart markers, the circuit timeline and the event log use the same phase times.
+
+Read `telemetry.routes.topology` for every logical circuit and `telemetry.routes.geographic` for inter-site circuits. Both collections reference the same immutable route readings. Each reading identifies the primary and selected physical links, effective health and delivered throughput in both directions. Forward flow runs from the catalog link's `from` endpoint to `to`. The reverse flow runs the other way. An unreachable circuit has no selected link or latency reading. The five-second telemetry clock owns these values.

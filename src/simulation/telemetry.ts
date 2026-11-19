@@ -6,6 +6,7 @@ import {
   type PathHealth,
 } from "./health";
 import type { Conditions, LinkId, Resource, ResourceId } from "./model";
+import { circuitScenario, networkRoutes } from "./network";
 import type { ScenarioSeed } from "./scenario";
 
 export const MINUTE = 60_000;
@@ -37,6 +38,7 @@ interface Marker {
   readonly linkId: LinkId;
 }
 export interface Telemetry {
+  readonly routes: ReturnType<typeof networkRoutes>;
   readonly current: Sample;
   readonly health: EnterpriseHealth;
   readonly history: readonly Sample[];
@@ -124,43 +126,39 @@ export function createSampler(
   seed: ScenarioSeed,
   conditions: Conditions,
 ) {
-  const backupWindow = seed === "backup-window";
-  const resourceId: ResourceId = backupWindow
-    ? "res-fra-orders"
-    : "res-nyc-desk";
-  const linkId: LinkId = backupWindow ? "link-tpa-fra" : "link-nyc-tpa";
+  const route = circuitScenario(seed);
+  const { linkId, resourceId } = route;
   const episodeId = `${seed}-circuit`;
-  const onset = startedAt - (backupWindow ? 180 : 360) * MINUTE;
+  const onset = startedAt + route.historicalStart;
   const recovery = onset + 15 * MINUTE;
   const resolved = recovery + 20 * MINUTE;
   const episodeMarkers: readonly Marker[] = [
     { at: onset, phase: "onset", resourceId, linkId, episodeId },
     { at: recovery, phase: "recovery", resourceId, linkId, episodeId },
     { at: resolved, phase: "resolved", resourceId, linkId, episodeId },
+    ...route.transitions.map((t) => ({
+      at: startedAt + t.elapsed,
+      phase: t.phase,
+      resourceId,
+      linkId,
+      episodeId: `${seed}-live-circuit`,
+    })),
   ];
   for (const marker of episodeMarkers) Object.freeze(marker);
   const outage: PathHealth = Object.freeze({ [linkId]: "Offline" });
   const normal: PathHealth = Object.freeze({});
   const seedPhase = phaseFor(seed);
   function sample(at: number) {
-    const disrupted = at >= onset && at < recovery;
-    // A burst queues work during interruption. After restoration the backlog drains.
-    const pressure = disrupted
-      ? 1
-      : at >= recovery && at < resolved
-        ? (resolved - at) / (resolved - recovery)
-        : 0;
-    const pathHealth = disrupted ? outage : normal;
-    const episode = episodeAt(at - startedAt, seed);
-    const resourceHealth = episode
-      ? {
-          ...conditions.resourceHealth,
-          [episode.resourceId]:
-            episode.stage === "critical"
-              ? ("Critical" as const)
-              : ("Degraded" as const),
-        }
-      : conditions.resourceHealth;
+    const elapsed = at - startedAt;
+    const { failed, pressure, serviceHealth } = route.stateAt(elapsed);
+    const pathHealth = failed ? outage : normal;
+    const episode = episodeAt(elapsed, seed);
+    const resourceHealth = { ...conditions.resourceHealth };
+    if (pressure) resourceHealth[resourceId] = serviceHealth;
+    if (episode && resourceHealth[episode.resourceId] !== "Critical") {
+      resourceHealth[episode.resourceId] =
+        episode.stage === "critical" ? "Critical" : "Degraded";
+    }
     const minutes = at / MINUTE;
     const daily = 9 * Math.sin((minutes * 2 * Math.PI) / 1440 + seedPhase);
     const readings: Partial<Record<ResourceId, Reading>> = {};
@@ -182,7 +180,7 @@ export function createSampler(
         (degraded && resource.threshold.metric === "responseMs"
           ? resource.threshold.degraded
           : 0) +
-          effect * 150 +
+          effect * (route.standby ? 150 : 800) +
           (episode?.resourceId === resource.id ? episode.delayMs : 0),
       );
       readings[resource.id] = reading;
@@ -211,6 +209,7 @@ export function createSampler(
     );
     return Object.freeze({
       ...latest,
+      routes: networkRoutes(route, liveAt - startedAt),
       history,
       markers: Object.freeze(
         episodeMarkers.filter(

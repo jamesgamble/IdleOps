@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "preact/compat";
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
 import {
   activityValue,
   dashboard,
@@ -22,9 +22,8 @@ export function CommandCenter({ simulation }: { simulation: Simulation }) {
   const view = useMemo(() => dashboard(snapshot), [snapshot]);
   const [selection, select] = useState<Selection | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (selection) dialog.current?.showModal();
-    else dialog.current?.close();
   }, [selection]);
   const indicator = view.indicators.find(
     (i) => selection?.kind === "indicator" && i.name === selection.id,
@@ -170,7 +169,7 @@ export function CommandCenter({ simulation }: { simulation: Simulation }) {
       >
         <div class="cc-heading">
           <h2 id="detail-title">{title}</h2>
-          <button type="button" onClick={() => select(null)}>
+          <button type="button" onClick={() => dialog.current?.close()}>
             Close
           </button>
         </div>

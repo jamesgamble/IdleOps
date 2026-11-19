@@ -1,11 +1,16 @@
 # IdleOps
 
-IdleOps is a fictional systems operations dashboard for the browser. A shared local simulation will generate its metrics, logs, alerts, and service states. The project is setting up its development environment. There is no application release yet.
+IdleOps is a silent, fictional systems engineering dashboard for Axiom Industries. One local browser simulation drives infrastructure telemetry, network traffic, security activity and incident investigation.
+
+Product Design & Requirements Handoff v1.0 is approved. The project is in development planning. The first release will include five operational screens and Settings. Application implementation awaits Product Owner authorization.
 
 ## Project record
 
-GitHub Issues hold approved requirements and acceptance criteria. The project board tracks progress, milestones group release work, and pull requests record verification. See the [product and architecture notes](docs/product.md) for scope and [contribution guide](CONTRIBUTING.md) for the development workflow.
+- [Approved design and acceptance criteria](docs/design-handoff-v1.md)
+- [Product and architecture summary](docs/product.md)
+- [Progressive MVP roadmap and Codex assignments](docs/roadmap.md)
+- [Current release milestone](https://github.com/jamesgamble/IdleOps/milestone/2)
+- [GitHub Project](https://github.com/users/jamesgamble/projects/1)
+- [Contribution and review workflow](CONTRIBUTING.md)
 
-## Getting started
-
-Pick an approved Issue before starting a branch. The repository currently contains project documentation, contributor templates, and a foundation check that runs on pull requests. Application build and run instructions will be added with the first implementation.
+The repository currently contains planning documents, contributor templates, and automated foundation checks. Build and run instructions will accompany the first implementation.

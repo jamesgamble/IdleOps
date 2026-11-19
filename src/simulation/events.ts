@@ -1,6 +1,8 @@
 import { catalog } from "./catalog";
 import { episodeAt, type Severity } from "./episodes";
+import type { LinkId } from "./model";
 import { type Conditions, freezeFixture, type ResourceId } from "./model";
+import { circuitScenario } from "./network";
 import type { ScenarioSeed } from "./scenario";
 import { MINUTE, type Telemetry } from "./telemetry";
 
@@ -9,6 +11,7 @@ interface Event {
   readonly resourceId: ResourceId;
   readonly severity: Severity;
   readonly message: string;
+  readonly linkId?: LinkId;
   readonly incidentId?: string;
 }
 interface Incident {
@@ -23,6 +26,7 @@ interface Incident {
 export interface Journal {
   readonly acknowledgedNoticeIds: readonly string[];
   readonly incidents: readonly Incident[];
+  readonly active: readonly Incident[];
   readonly logs: readonly Event[];
 }
 
@@ -36,6 +40,10 @@ export function createJournal(
   const incidents = new Map<string, Incident>();
   const acknowledgedNoticeIds = new Set<string>();
   let current: Incident | undefined;
+  const active = new Map<string, Incident>();
+  const route = circuitScenario(seed);
+  const circuitId = `${seed}-live-circuit`;
+  let transitionIndex = 0;
   function record(event: Event) {
     logs.push(Object.freeze(event));
   }
@@ -59,6 +67,8 @@ export function createJournal(
       timeline: Object.freeze([...(previous?.timeline ?? []), entry]),
     });
     incidents.set(id, incident);
+    if (stage === "resolved") active.delete(id);
+    else active.set(id, incident);
     return incident;
   }
   for (const marker of markers) {
@@ -67,6 +77,7 @@ export function createJournal(
       marker.phase,
       {
         at: marker.at,
+        linkId: marker.linkId,
         resourceId: marker.resourceId,
         severity: marker.phase === "onset" ? "error" : "info",
         message: {
@@ -84,6 +95,7 @@ export function createJournal(
     if (logs.length > 500) logs.splice(0, logs.length - 500);
     published = Object.freeze({
       acknowledgedNoticeIds: Object.freeze([...acknowledgedNoticeIds]),
+      active: Object.freeze([...active.values()]),
       incidents: Object.freeze([...incidents.values()]),
       logs: Object.freeze([...logs]),
     });
@@ -109,7 +121,24 @@ export function createJournal(
       // Replay the rest of an observed episode before skipping unobserved time.
       // Each episode lasts at most five minutes, even after a long suspension.
       for (let i = cursor + 1; i <= tick; i++) {
-        if (!current && i < first) i = first;
+        const transition = route.transitions[transitionIndex];
+        if (!current && i < first)
+          i = Math.min(first, transition ? transition.elapsed / 10_000 : first);
+        if (transition && i * 10_000 === transition.elapsed) {
+          update(
+            circuitId,
+            transition.phase,
+            {
+              at: start + transition.elapsed,
+              linkId: route.linkId,
+              resourceId: route.resourceId,
+              severity: transition.severity,
+              message: transition.message,
+            },
+            transition.phase === "onset",
+          );
+          transitionIndex++;
+        }
         const elapsed = i * 10_000;
         const at = start + elapsed;
         const episode = episodeAt(elapsed, seed);
@@ -167,19 +196,22 @@ export function createJournal(
         });
         return publish();
       }
-      if (!current || current.id !== id || current.acknowledged) return;
-      current = update(
+      const incident = active.get(id);
+      if (!incident || incident.acknowledged) return;
+      const acknowledged = update(
         id,
-        current.stage,
+        incident.stage,
         {
           at,
-          resourceId: current.resourceId,
-          severity: current.severity,
+          linkId: incident.timeline[0]?.linkId,
+          resourceId: incident.resourceId,
+          severity: incident.severity,
           message: "Operator acknowledged the open alert.",
         },
         false,
         true,
       );
+      if (current?.id === id) current = acknowledged;
       return publish();
     },
   };
@@ -189,7 +221,6 @@ export function activeConditions(
   base: Conditions,
   journal: Journal,
 ): Conditions {
-  const incident = journal.incidents.at(-1);
   const alerts = journal.acknowledgedNoticeIds.length
     ? base.alerts.map((alert) =>
         journal.acknowledgedNoticeIds.includes(alert.id)
@@ -197,25 +228,30 @@ export function activeConditions(
           : alert,
       )
     : base.alerts;
-  if (!incident || incident.stage === "resolved")
+  if (!journal.active.length)
     return alerts === base.alerts ? base : freezeFixture({ ...base, alerts });
+  const resourceHealth = { ...base.resourceHealth };
+  const raised = journal.active.map((incident) => {
+    if (resourceHealth[incident.resourceId] !== "Critical")
+      resourceHealth[incident.resourceId] =
+        incident.severity === "critical" ? "Critical" : "Degraded";
+    const first = incident.timeline[0];
+    return {
+      id: incident.id,
+      resourceId: incident.resourceId,
+      severity: incident.severity,
+      message: first?.linkId
+        ? incident.stage === "recovery"
+          ? `Restoring ${first.linkId}`
+          : first.message
+        : "Service queue above baseline",
+      acknowledged: incident.acknowledged,
+      occurrences: incident.occurrences,
+    };
+  });
   return freezeFixture<Conditions>({
-    resourceHealth: {
-      ...base.resourceHealth,
-      [incident.resourceId]:
-        incident.severity === "critical" ? "Critical" : "Degraded",
-    },
-    alerts: [
-      ...alerts,
-      {
-        id: incident.id,
-        resourceId: incident.resourceId,
-        severity: incident.severity,
-        message: "Service queue above baseline",
-        acknowledged: incident.acknowledged,
-        occurrences: incident.occurrences,
-      },
-    ].sort((a, b) => {
+    resourceHealth,
+    alerts: [...alerts, ...raised].sort((a, b) => {
       const rank: Record<Severity, number> = {
         critical: 0,
         error: 1,

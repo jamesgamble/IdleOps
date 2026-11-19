@@ -2,7 +2,7 @@
 
 IdleOps is a silent, fictional systems engineering dashboard for Axiom Industries. One local browser simulation drives infrastructure telemetry, network traffic, security activity and incident investigation.
 
-The static shell includes Command Center, Infrastructure, Networking, Security, Event Console, and Settings. Each view shares one in-memory session. Navigation keeps its start time and uptime, and reloading starts a new session. The Command Center reads six indicators, a geographic and dependency overview, 24-hour charts, a severity-ordered queue and recent events from that session. Select an indicator to inspect its inputs, or select an alert to inspect its timeline and acknowledge it. The full interactive map renderers are tracked in #12.
+The static shell includes Command Center, Infrastructure, Networking, Security, Event Console, and Settings. Each view shares one in-memory session. Navigation keeps its start time and uptime, and reloading starts a new session. The Command Center reads six indicators, a geographic and dependency overview, 24-hour charts, a severity-ordered queue and recent events from that session. Select an indicator to inspect its inputs, or select an alert to inspect its timeline and acknowledge it. Networking and Command Center share the geographic map, and Networking also provides a device topology.
 
 ## Run locally
 
@@ -51,3 +51,9 @@ The [resource profiles](src/simulation/profiles.ts) define static configuration,
 - [Contribution and review workflow](CONTRIBUTING.md)
 
 The Infrastructure screen groups the monitored estate by resource category. Search by name, ID or purpose and select a row to inspect its configuration, live readings, CPU history and recent activity. Architecture and the Command Center dependency map share a resource selector and diagram. The detail drawer lists supported action profiles; staged operations are tracked in #14.
+
+## Network maps
+
+Networking opens on a device topology grouped by site. Drag the background or use the pan buttons, zoom controls and Reset view. Select a device to inspect its resource drawer. Select either physical circuit to see its own traffic and the effective route. Dashed lines identify standby or offline links. Moving particles follow the two traffic directions and disappear when the link carries no traffic or reduced motion is enabled. The geographic map in Networking and Command Center shares these readings. Select a city to inspect its local time, cloud-hosted and on-site resources, connectivity, dependencies, diagnostics and recent events.
+
+The bundled North Atlantic land silhouette uses [Natural Earth 1:110m land polygons](https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_110m_land.geojson). The bundled SVG path data uses an equirectangular projection. Both geographic views draw that path with the site and circuit overlays in the same SVG. Natural Earth publishes its map data in the [public domain](https://www.naturalearthdata.com/about/terms-of-use/). All site, cloud, device and circuit overlays come from the fictional local catalog.

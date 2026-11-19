@@ -171,18 +171,26 @@ export function NetworkDrawer({
   useLayoutEffect(() => {
     dialog.current?.showModal();
   }, []);
+  function close() {
+    // Restore focus and clear the selection before another activation can arrive.
+    dialog.current?.close();
+    onClose();
+  }
   return (
     <dialog
       class="cc-drawer asset-drawer"
       ref={dialog}
-      onClose={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        close();
+      }}
       aria-labelledby="network-detail-title"
     >
       <header class="cc-heading">
         <h2 id="network-detail-title">
           {"site" in selection ? selection.site.city : selection.link.id}
         </h2>
-        <button type="button" onClick={() => dialog.current?.close()}>
+        <button type="button" onClick={close}>
           Close
         </button>
       </header>

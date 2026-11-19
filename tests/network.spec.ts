@@ -90,7 +90,8 @@ test("tracks circuit failover across Networking, Infrastructure and Command Cent
   });
   await tampa.locator("circle.node-core").click();
   await expect(drawer).toHaveAccessibleName("Tampa");
-  await drawer.getByRole("button", { name: "Close" }).click();
+  await page.keyboard.press("Escape");
+  await expect(drawer).toHaveCount(0);
   await tampa.press("Space");
   await expect(drawer.getByText(/America\/New_York/)).toBeVisible();
   await expect(

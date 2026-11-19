@@ -29,7 +29,12 @@ export function createSession(
   const conditions = createConditions(seed);
   const reconcile = createSampler(startedAt, seed, conditions);
   const telemetry = reconcile(startedAt);
-  const journal = createJournal(startedAt, seed, telemetry.markers);
+  const journal = createJournal(
+    startedAt,
+    seed,
+    telemetry.markers,
+    conditions.alerts,
+  );
   let snapshot: SimulationSnapshot = Object.freeze({
     startedAt,
     elapsedSeconds: 0,

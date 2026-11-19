@@ -21,6 +21,7 @@ interface Incident {
   readonly timeline: readonly Event[];
 }
 export interface Journal {
+  readonly acknowledgedNoticeIds: readonly string[];
   readonly incidents: readonly Incident[];
   readonly logs: readonly Event[];
 }
@@ -29,9 +30,11 @@ export function createJournal(
   start: number,
   seed: ScenarioSeed,
   markers: Telemetry["markers"],
+  notices: Conditions["alerts"],
 ) {
   const logs: Event[] = [];
   const incidents = new Map<string, Incident>();
+  const acknowledgedNoticeIds = new Set<string>();
   let current: Incident | undefined;
   function record(event: Event) {
     logs.push(Object.freeze(event));
@@ -80,6 +83,7 @@ export function createJournal(
   function publish() {
     if (logs.length > 500) logs.splice(0, logs.length - 500);
     published = Object.freeze({
+      acknowledgedNoticeIds: Object.freeze([...acknowledgedNoticeIds]),
       incidents: Object.freeze([...incidents.values()]),
       logs: Object.freeze([...logs]),
     });
@@ -102,12 +106,10 @@ export function createJournal(
       if (tick <= cursor) return published;
       // After suspension, retain observed history and rebuild only the recent activity window.
       const first = Math.max(cursor + 1, tick - 599);
-      if (current && first > cursor + 1) {
-        let end = cursor * 10_000;
-        while (episodeAt(end, seed)?.id === current.id) end += 10_000;
-        resolve(start + end);
-      }
-      for (let i = first; i <= tick; i++) {
+      // Replay the rest of an observed episode before skipping unobserved time.
+      // Each episode lasts at most five minutes, even after a long suspension.
+      for (let i = cursor + 1; i <= tick; i++) {
+        if (!current && i < first) i = first;
         const elapsed = i * 10_000;
         const at = start + elapsed;
         const episode = episodeAt(elapsed, seed);
@@ -153,6 +155,18 @@ export function createJournal(
       return publish();
     },
     acknowledge(id: string, at: number) {
+      const notice = notices.find((alert) => alert.id === id);
+      if (notice) {
+        if (acknowledgedNoticeIds.has(id)) return;
+        acknowledgedNoticeIds.add(id);
+        record({
+          at,
+          resourceId: notice.resourceId,
+          severity: notice.severity,
+          message: `Operator acknowledged: ${notice.message}`,
+        });
+        return publish();
+      }
       if (!current || current.id !== id || current.acknowledged) return;
       current = update(
         id,
@@ -176,7 +190,15 @@ export function activeConditions(
   journal: Journal,
 ): Conditions {
   const incident = journal.incidents.at(-1);
-  if (!incident || incident.stage === "resolved") return base;
+  const alerts = journal.acknowledgedNoticeIds.length
+    ? base.alerts.map((alert) =>
+        journal.acknowledgedNoticeIds.includes(alert.id)
+          ? Object.freeze({ ...alert, acknowledged: true })
+          : alert,
+      )
+    : base.alerts;
+  if (!incident || incident.stage === "resolved")
+    return alerts === base.alerts ? base : freezeFixture({ ...base, alerts });
   return freezeFixture<Conditions>({
     resourceHealth: {
       ...base.resourceHealth,
@@ -184,7 +206,7 @@ export function activeConditions(
         incident.severity === "critical" ? "Critical" : "Degraded",
     },
     alerts: [
-      ...base.alerts,
+      ...alerts,
       {
         id: incident.id,
         resourceId: incident.resourceId,

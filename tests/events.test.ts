@@ -92,3 +92,57 @@ it("closes an observed fault across suspension and publishes once", () => {
   expect(journal.logs).toHaveLength(500);
   expect(journal.incidents.length).toBeLessThan(20);
 });
+
+it("retains each observation once when the replay window starts inside an observed incident", () => {
+  const onset = 25 * MINUTE;
+  const resume = 125 * MINUTE + 10_000;
+  const foreground = createSession(0);
+  const suspended = createSession(0);
+  for (const session of [foreground, suspended]) {
+    session.advance(onset);
+    session.acknowledge("backup-window-queue-2");
+  }
+  foreground.advance(30 * MINUTE);
+  foreground.advance(resume);
+  suspended.advance(resume);
+  const incident = suspended
+    .getSnapshot()
+    .journal.incidents.find((i) => i.id === "backup-window-queue-2");
+  expect(
+    incident?.timeline.filter((e) => e.message.startsWith("Queue cleared")),
+  ).toHaveLength(1);
+  expect(incident).toEqual(
+    foreground
+      .getSnapshot()
+      .journal.incidents.find((i) => i.id === "backup-window-queue-2"),
+  );
+  expect(incident?.timeline.map((e) => e.at)).toEqual(
+    incident?.timeline.map((e) => e.at).sort((a, b) => a - b),
+  );
+});
+
+it.each(["backup-window", "replica-refresh"] as const)(
+  "acknowledges both initial %s notices once and preserves their conditions",
+  (seed) => {
+    const session = createSession(0, seed);
+    const initial = session.getSnapshot();
+    for (const notice of initial.conditions.alerts) {
+      session.acknowledge(notice.id);
+      const seen = session.getSnapshot();
+      expect(seen.journal.logs.at(-1)?.resourceId).toBe(notice.resourceId);
+      session.acknowledge(notice.id);
+      expect(session.getSnapshot()).toBe(seen);
+    }
+    for (const minutes of [0, 4, 10]) {
+      session.advance(minutes * MINUTE);
+      const { conditions } = session.getSnapshot();
+      for (const notice of initial.conditions.alerts) {
+        expect(conditions.alerts.find((a) => a.id === notice.id)).toEqual({
+          ...notice,
+          acknowledged: true,
+        });
+        expect(conditions.resourceHealth[notice.resourceId]).toBe("Degraded");
+      }
+    }
+  },
+);

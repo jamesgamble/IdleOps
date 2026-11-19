@@ -3,14 +3,10 @@ import { Icon } from "../ui/Icon";
 import { type Route, screens } from "../ui/routes";
 import { SessionDetails } from "../ui/SessionDetails";
 import { CommandCenter } from "./CommandCenter";
-
 import { Infrastructure } from "./Infrastructure";
+import { Networking } from "./Networking";
 
 const placeholders = {
-  networking: [
-    "Network topology",
-    "Regional connections and simulated network paths will appear here.",
-  ],
   security: [
     "Security activity",
     "Simulated security events and alerts will appear here.",
@@ -47,6 +43,8 @@ export function Workspace({
         <CommandCenter simulation={simulation} />
       ) : route === "infrastructure" ? (
         <Infrastructure simulation={simulation} />
+      ) : route === "networking" ? (
+        <Networking simulation={simulation} />
       ) : (
         <div class="workspace-grid">
           <section class="panel placeholder">

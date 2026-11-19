@@ -1,0 +1,139 @@
+.network-workspace {
+  display: grid;
+  gap: 16px;
+}
+.network-workspace > .session {
+  max-width: 480px;
+}
+.network-map .net-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 66vh;
+  touch-action: none;
+  background-color: #0c1a1d;
+  background-image:
+    linear-gradient(#34505344 1px, transparent 1px),
+    linear-gradient(90deg, #34505344 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+.ops-map .network-map .net-scene {
+  height: clamp(180px, 22vh, 350px);
+}
+.net-zone {
+  fill: #112527;
+  fill-opacity: 0.7;
+  stroke: #284849;
+}
+.network-map .net-scene text {
+  fill: var(--text);
+  stroke: #0c1a1d;
+  stroke-width: 2px;
+  paint-order: stroke fill;
+  text-anchor: middle;
+  font: 600 13px var(--mono);
+  pointer-events: none;
+}
+.network-map .net-scene .cloud-label {
+  fill: var(--muted);
+  font: 11px var(--mono);
+}
+.network-map .net-scene .zone-title {
+  fill: #9dbabc;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.net-wire,
+.net-hit {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8px;
+}
+.net-hit {
+  stroke: transparent;
+  stroke-width: 12px;
+  pointer-events: stroke;
+}
+.traffic-dot {
+  fill: currentColor;
+  pointer-events: none;
+}
+.traffic-dot.reverse {
+  opacity: 0.65;
+}
+.net-link,
+.map-node {
+  cursor: pointer;
+}
+.net-link:hover .net-wire,
+.net-link:focus .net-wire {
+  stroke-width: 4px;
+}
+.node-halo {
+  fill: currentColor;
+  fill-opacity: 0.18;
+  stroke: currentColor;
+  stroke-opacity: 0.65;
+}
+.node-core {
+  fill: currentColor;
+  filter: drop-shadow(0 0 3px currentColor);
+}
+.device-body {
+  fill: #132427;
+  stroke: currentColor;
+}
+.map-node:focus,
+.net-link:focus {
+  outline: 1px solid var(--amber);
+}
+.camera-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  padding: 7px 12px;
+  background: #102023;
+  color: var(--muted);
+  font: 12px var(--mono);
+}
+.camera-controls button {
+  background: #182a2d;
+  border: 1px solid #416364;
+  border-radius: 3px;
+  padding: 5px 9px;
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  .traffic-dot {
+    display: none;
+  }
+}
+.net-key {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 5px 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font: 11px var(--mono);
+}
+.net-key span::before {
+  content: "";
+  display: inline-block;
+  margin-right: 4px;
+  width: 12px;
+  border-top: 2px solid var(--cyan);
+  vertical-align: middle;
+}
+.net-key span:nth-child(2)::before {
+  border-color: var(--amber);
+}
+.net-key span:nth-child(3)::before {
+  border-color: var(--red);
+  border-top-style: dashed;
+}
+.net-key span:nth-child(4)::before {
+  border-color: #587275;
+  border-top-style: dashed;
+}

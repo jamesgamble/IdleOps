@@ -112,8 +112,9 @@ export function EventConsole({ simulation }: { simulation: Simulation }) {
             />
           </label>
           <label>
-            Severity
+            <span id="log-filter-severity">Severity</span>
             <select
+              aria-labelledby="log-filter-severity"
               value={filters.severity}
               onChange={(e) => change("severity", e.currentTarget.value)}
             >
@@ -126,8 +127,9 @@ export function EventConsole({ simulation }: { simulation: Simulation }) {
             </select>
           </label>
           <label>
-            Resource
+            <span id="log-filter-resource">Resource</span>
             <select
+              aria-labelledby="log-filter-resource"
               value={filters.resource}
               onChange={(e) => change("resource", e.currentTarget.value)}
             >
@@ -140,8 +142,9 @@ export function EventConsole({ simulation }: { simulation: Simulation }) {
             </select>
           </label>
           <label>
-            Location
+            <span id="log-filter-location">Location</span>
             <select
+              aria-labelledby="log-filter-location"
               value={filters.location}
               onChange={(e) => change("location", e.currentTarget.value)}
             >

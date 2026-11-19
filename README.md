@@ -2,7 +2,7 @@
 
 IdleOps is a silent, fictional systems engineering dashboard for Axiom Industries. One local browser simulation drives infrastructure telemetry, network traffic, security activity and incident investigation.
 
-The static shell includes Command Center, Infrastructure, Networking, Security, Event Console, and Settings. Each view shares one in-memory session. Navigation keeps its start time and uptime, and reloading starts a new session. The schematic and operational panels are labeled previews for later assignments.
+The static shell includes Command Center, Infrastructure, Networking, Security, Event Console, and Settings. Each view shares one in-memory session. Navigation keeps its start time and uptime, and reloading starts a new session. The Command Center reads six indicators, a geographic and dependency overview, 24-hour charts, a severity-ordered queue and recent events from that session. Select an indicator to inspect its inputs, or select an alert to inspect its timeline and acknowledge it. The full interactive map renderers are tracked in #12.
 
 ## Run locally
 
@@ -30,10 +30,11 @@ On Linux runners, use `npx playwright install --with-deps chromium`. The check r
 
 The entry point creates one session and advances its clock. The framework-independent [simulation boundary](src/simulation/session.ts) exposes immutable snapshots and subscriptions. Screens receive the read-only interface and unsubscribe on unmount. Add future operational state to this boundary so every view reads the same environment.
 
-Each snapshot exposes three parts of the fictional environment:
+Each snapshot exposes four parts of the fictional environment:
 
 - `catalog` defines the five sites, Nebula Cloud, Stratos Cloud, 36 named resources, and 17 network links. The enterprise totals of 48 physical servers and 216 virtual machines describe the whole estate. The detailed inventory samples that estate and also includes applications, services, and network devices.
 - `conditions` holds session-owned health by resource ID and informational alerts referencing those same IDs. The default `backup-window` seed starts with minor delays in archive verification and reporting. Pass `"replica-refresh"` as the second argument to `createSession(startedAt, seed)` for a reproducible recovery-workload scenario.
+- `journal` retains incident timelines, acknowledgments and the most recent 500 events.
 - `telemetry` holds current resource readings and path conditions, the enterprise health score and its per-resource contributions, a rolling 24-hour sample history, and seeded historical markers. [Sampling and scoring assumptions](docs/telemetry.md) describe the units, fixture timeline, and retention bounds.
 
 In the [catalog](src/simulation/catalog.ts), a resource’s `siteId` identifies its geographic region. Its `cloudId` identifies the hosting platform, with `null` for on-site equipment. Resource dependencies point from consumer to prerequisite. For example, Frankfurt order processing depends on its regional database, the Tampa directory service, and the primary circuit between those sites. Network links join two device IDs bidirectionally. A standby circuit’s `backupFor` points to the primary link serving the same endpoints.

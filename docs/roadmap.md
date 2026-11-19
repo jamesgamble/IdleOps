@@ -1,6 +1,6 @@
 # Progressive MVP development plan
 
-**The Product Owner has authorized the static shell in #5.** The [approved handoff](design-handoff-v1.md) is the scope baseline. The eight stages are integration checkpoints within one MVP milestone. Priorities sequence work: P0 marks a dependency or release gate; P1 is also required for release. Do not dispatch an issue until its prerequisites are merged. Keep one implementation PR active initially and use measured throughput from the first three assignments before forecasting a date.
+Simulation foundations #5–8 are merged. The Command Center consumes those shared records in #9. Full geographic and topology renderers follow in #12. The [approved handoff](design-handoff-v1.md) is the scope baseline. The eight stages are integration checkpoints within one MVP milestone. Priorities sequence work: P0 marks a dependency or release gate; P1 is also required for release. Do not dispatch an issue until its prerequisites are merged. Keep one implementation PR active initially and use measured throughput from the first three assignments before forecasting a date.
 
 ## Architecture recommendation
 

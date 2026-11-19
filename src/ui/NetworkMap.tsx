@@ -29,7 +29,7 @@ function topology(r: Resource): Point {
 function interaction(name: string, open: () => void) {
   return {
     role: "button" as const,
-    tabIndex: 0,
+    tabindex: 0,
     "aria-label": name,
     onClick: open,
     onKeyDown: (e: KeyboardEvent) => {

@@ -49,3 +49,5 @@ The [resource profiles](src/simulation/profiles.ts) define static configuration,
 - [Current release milestone](https://github.com/jamesgamble/IdleOps/milestone/2)
 - [GitHub Project](https://github.com/users/jamesgamble/projects/1)
 - [Contribution and review workflow](CONTRIBUTING.md)
+
+The Infrastructure screen groups the monitored estate by resource category. Search by name, ID or purpose and select a row to inspect its configuration, live readings, CPU history and recent activity. Architecture and the Command Center dependency map share a resource selector and diagram. The detail drawer lists supported action profiles; staged operations are tracked in #14.

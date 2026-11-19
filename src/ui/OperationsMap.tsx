@@ -1,6 +1,8 @@
 import { useState } from "preact/hooks";
 import type { SimulationSnapshot } from "../simulation/session";
 
+import { DependencyDiagram } from "./DependencyDiagram";
+
 export function OperationsMap({ snapshot }: { snapshot: SimulationSnapshot }) {
   const [geo, setGeo] = useState(true);
   const { catalog, conditions } = snapshot;
@@ -18,12 +20,6 @@ export function OperationsMap({ snapshot }: { snapshot: SimulationSnapshot }) {
     const to = sites.find((s) => s.id === b.siteId);
     return from && to ? [{ id: link.id, from, to }] : [];
   });
-  const app = catalog.resources.find((r) => r.id === "res-fra-orders");
-  if (!app) return null;
-  const deps = app.dependsOn.map((id) => ({
-    id,
-    label: catalog.resources.find((r) => r.id === id)?.name ?? id,
-  }));
   return (
     <section class="panel ops-map">
       <div class="cc-heading">
@@ -97,20 +93,12 @@ export function OperationsMap({ snapshot }: { snapshot: SimulationSnapshot }) {
           })}
         </svg>
       ) : (
-        <div class="dependency-map">
-          <strong>{app.name}</strong>
-          <span>Depends on</span>
-          <ul>
-            {deps.map((d) => (
-              <li key={d.id}>{d.label}</li>
-            ))}
-          </ul>
-        </div>
+        <DependencyDiagram snapshot={snapshot} />
       )}
       <div class="cc-caption">
         {geo
           ? "Regional paths · five Axiom sites"
-          : "Frankfurt order processing · direct prerequisites"}
+          : "Resource dependencies · direct prerequisites"}
       </div>
     </section>
   );

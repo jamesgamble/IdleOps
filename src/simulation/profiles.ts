@@ -9,7 +9,7 @@ export const profiles = {
       memoryGiB: 64,
     },
     threshold: { metric: "cpuPercent", degraded: 80, critical: 95 },
-    actions: ["inspect", "check-health", "run-maintenance"],
+    actions: ["inspect", "check-health", "run-maintenance", "apply-update"],
   },
   workerVM: {
     configuration: {
@@ -19,7 +19,7 @@ export const profiles = {
       memoryGiB: 32,
     },
     threshold: { metric: "cpuPercent", degraded: 85, critical: 97 },
-    actions: ["inspect", "check-health", "run-maintenance"],
+    actions: ["inspect", "check-health", "run-maintenance", "apply-update"],
   },
   application: {
     configuration: {
@@ -42,7 +42,7 @@ export const profiles = {
       maxConnections: 240,
     },
     threshold: { metric: "connectionsPercent", degraded: 75, critical: 90 },
-    actions: ["inspect", "check-health", "run-maintenance"],
+    actions: ["inspect", "check-health", "run-maintenance", "apply-update"],
   },
   storage: {
     configuration: {
@@ -51,7 +51,7 @@ export const profiles = {
       capacityTiB: 64,
     },
     threshold: { metric: "capacityPercent", degraded: 82, critical: 95 },
-    actions: ["inspect", "check-health", "run-maintenance"],
+    actions: ["inspect", "check-health", "run-maintenance", "apply-update"],
   },
   router: {
     configuration: {
@@ -61,7 +61,7 @@ export const profiles = {
       throughputGbps: 10,
     },
     threshold: { metric: "throughputPercent", degraded: 78, critical: 94 },
-    actions: ["inspect", "check-health", "diagnose-link"],
+    actions: ["inspect", "check-health", "diagnose-link", "run-maintenance"],
   },
   switch: {
     configuration: {
@@ -71,7 +71,7 @@ export const profiles = {
       throughputGbps: 40,
     },
     threshold: { metric: "throughputPercent", degraded: 82, critical: 96 },
-    actions: ["inspect", "check-health", "diagnose-link"],
+    actions: ["inspect", "check-health", "diagnose-link", "run-maintenance"],
   },
   firewall: {
     configuration: {
@@ -81,7 +81,7 @@ export const profiles = {
       throughputGbps: 10,
     },
     threshold: { metric: "throughputPercent", degraded: 72, critical: 90 },
-    actions: ["inspect", "check-health", "diagnose-link"],
+    actions: ["inspect", "check-health", "diagnose-link", "run-maintenance"],
   },
   gateway: {
     configuration: {
@@ -91,6 +91,6 @@ export const profiles = {
       throughputGbps: 10,
     },
     threshold: { metric: "throughputPercent", degraded: 80, critical: 94 },
-    actions: ["inspect", "check-health", "diagnose-link"],
+    actions: ["inspect", "check-health", "diagnose-link", "run-maintenance"],
   },
 } as const satisfies Record<string, Profile>;

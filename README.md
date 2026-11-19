@@ -28,7 +28,7 @@ On Linux runners, use `npx playwright install --with-deps chromium`. The check r
 
 ## Extend the simulation
 
-The entry point creates one session and advances its clock. The framework-independent [simulation boundary](src/simulation/session.ts) exposes immutable snapshots and subscriptions. Screens receive the read-only interface and unsubscribe on unmount. Add future operational state to this boundary so every view reads the same environment.
+The entry point creates one session and advances its clock. The framework-independent [simulation boundary](src/simulation/session.ts) exposes immutable snapshots and subscriptions. Screens receive the session interface and unsubscribe on unmount. Add future operational state to this boundary so every view reads the same environment.
 
 Each snapshot exposes four parts of the fictional environment:
 
@@ -50,7 +50,9 @@ The [resource profiles](src/simulation/profiles.ts) define static configuration,
 - [GitHub Project](https://github.com/users/jamesgamble/projects/1)
 - [Contribution and review workflow](CONTRIBUTING.md)
 
-The Infrastructure screen groups the monitored estate by resource category. Search by name, ID or purpose and select a row to inspect its configuration, live readings, CPU history and recent activity. Architecture and the Command Center dependency map share a resource selector and diagram. The detail drawer lists supported action profiles; staged operations are tracked in #14.
+The Infrastructure screen groups the monitored estate by resource category. Search by name, ID or purpose and select a row to inspect its configuration, live readings, CPU history and recent activity. Architecture and the Command Center dependency map share a resource selector and diagram. Resource and network drawers dispatch local operations through the shared session. Each resource supports one operation at a time. Commands advance through five-second stages on the simulation clock. Restarting a service briefly takes it offline. Updates and maintenance temporarily reduce availability. Diagnostics record the observed readings.
+
+Open a Command Center incident to inspect its timeline, affected resource, metrics and recent logs. Acknowledgment records operator awareness. Restarting the affected application can clear its queue early. Running maintenance on the primary circuit endpoint can restore a failed route early. Completed investigations remain under Resolved incidents for this session.
 
 ## Network maps
 

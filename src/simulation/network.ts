@@ -20,38 +20,53 @@ export function circuitScenario(seed: ScenarioSeed) {
   const historicalStart = -(redundant ? 180 : 360) * minute;
   const liveStart = 45 * minute;
   const standby = standbys.get(linkId);
+  type Transition = {
+    elapsed: number;
+    phase: "onset" | "recovery" | "resolved";
+    severity: "info" | "warning" | "critical";
+    message: string;
+  };
+  const transitions: [Transition, Transition, Transition] = [
+    {
+      elapsed: liveStart,
+      phase: "onset",
+      severity: standby ? "warning" : "critical",
+      message: standby
+        ? `Primary ${linkId} offline; traffic transferred to ${standby.id}.`
+        : `Primary ${linkId} offline; no reachable path.`,
+    },
+    {
+      elapsed: liveStart + 5 * minute,
+      phase: "recovery",
+      severity: "warning",
+      message: `Primary ${linkId} restored; traffic returning and queues draining.`,
+    },
+    {
+      elapsed: liveStart + 10 * minute,
+      phase: "resolved",
+      severity: "info",
+      message: `Primary ${linkId} stable; normal service resumed.`,
+    },
+  ];
   return {
     linkId,
     resourceId,
     standby,
-    transitions: [
-      {
-        elapsed: liveStart,
-        phase: "onset",
-        severity: standby ? "warning" : "critical",
-        message: standby
-          ? `Primary ${linkId} offline; traffic transferred to ${standby.id}.`
-          : `Primary ${linkId} offline; no reachable path.`,
-      },
-      {
-        elapsed: liveStart + 5 * minute,
-        phase: "recovery",
-        severity: "warning",
-        message: `Primary ${linkId} restored; traffic returning and queues draining.`,
-      },
-      {
-        elapsed: liveStart + 10 * minute,
-        phase: "resolved",
-        severity: "info",
-        message: `Primary ${linkId} stable; normal service resumed.`,
-      },
-    ] as const,
+    transitions,
     historicalStart,
+    assist(tick: number) {
+      transitions[1].elapsed = Math.min(transitions[1].elapsed, tick);
+      transitions[2].elapsed = Math.min(transitions[2].elapsed, tick + 10000);
+    },
     stateAt(elapsed: number) {
       const historical = elapsed < 0;
       const age = elapsed - (historical ? historicalStart : liveStart);
-      const outage = (historical ? 15 : 5) * minute;
-      const drain = (historical ? 20 : 5) * minute;
+      const outage = historical
+        ? 15 * minute
+        : transitions[1].elapsed - liveStart;
+      const drain = historical
+        ? 20 * minute
+        : transitions[2].elapsed - transitions[1].elapsed;
       const failed = age >= 0 && age < outage;
       const pressure = failed
         ? 1

@@ -1,5 +1,6 @@
 import type { Simulation } from "../simulation/session";
 import { Icon } from "../ui/Icon";
+import { SimulationContext } from "../ui/OperationControls";
 import { type Route, screens } from "../ui/routes";
 import { SessionDetails } from "../ui/SessionDetails";
 import { CommandCenter } from "./CommandCenter";
@@ -24,7 +25,7 @@ export function Workspace({
 }) {
   const screen = screens[route];
   return (
-    <>
+    <SimulationContext.Provider value={simulation}>
       <div class="breadcrumb">
         Workspace <span>/</span>{" "}
         {route === "settings" ? "System" : "Operations"}
@@ -61,6 +62,6 @@ export function Workspace({
           <SessionDetails simulation={simulation} />
         </div>
       )}
-    </>
+    </SimulationContext.Provider>
   );
 }

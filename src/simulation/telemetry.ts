@@ -1,12 +1,12 @@
 import { catalog } from "./catalog";
-import { episodeAt } from "./episodes";
 import {
   createHealthSelector,
   type EnterpriseHealth,
   type PathHealth,
 } from "./health";
-import type { Conditions, LinkId, Resource, ResourceId } from "./model";
-import { circuitScenario, networkRoutes } from "./network";
+import type { Conditions, Health, LinkId, Resource, ResourceId } from "./model";
+import { networkRoutes } from "./network";
+import type { createOperationalScenario } from "./operations";
 import type { ScenarioSeed } from "./scenario";
 
 export const MINUTE = 60_000;
@@ -125,8 +125,10 @@ export function createSampler(
   startedAt: number,
   seed: ScenarioSeed,
   conditions: Conditions,
+  scenario: ReturnType<typeof createOperationalScenario>,
+  operating: (id: ResourceId, at: number) => Health | undefined,
 ) {
-  const route = circuitScenario(seed);
+  const route = scenario.circuit;
   const { linkId, resourceId } = route;
   const episodeId = `${seed}-circuit`;
   const onset = startedAt + route.historicalStart;
@@ -136,14 +138,15 @@ export function createSampler(
     { at: onset, phase: "onset", resourceId, linkId, episodeId },
     { at: recovery, phase: "recovery", resourceId, linkId, episodeId },
     { at: resolved, phase: "resolved", resourceId, linkId, episodeId },
-    ...route.transitions.map((t) => ({
+  ];
+  const liveMarkers = () =>
+    route.transitions.map((t) => ({
       at: startedAt + t.elapsed,
       phase: t.phase,
       resourceId,
       linkId,
       episodeId: `${seed}-live-circuit`,
-    })),
-  ];
+    }));
   for (const marker of episodeMarkers) Object.freeze(marker);
   const outage: PathHealth = Object.freeze({ [linkId]: "Offline" });
   const normal: PathHealth = Object.freeze({});
@@ -152,7 +155,7 @@ export function createSampler(
     const elapsed = at - startedAt;
     const { failed, pressure, serviceHealth } = route.stateAt(elapsed);
     const pathHealth = failed ? outage : normal;
-    const episode = episodeAt(elapsed, seed);
+    const episode = scenario.episode(elapsed);
     const resourceHealth = { ...conditions.resourceHealth };
     if (pressure) resourceHealth[resourceId] = serviceHealth;
     if (episode && resourceHealth[episode.resourceId] !== "Critical") {
@@ -172,8 +175,12 @@ export function createSampler(
         slowLoad +
         5 * Math.sin(minutes / 9 + phase) +
         2 * Math.sin(minutes * 1.3 + phase);
+      const operation = operating(resource.id, at);
+      if (operation) resourceHealth[resource.id] = operation;
       const reading = measure(
-        demand + (degraded ? 34 : 0) + 64 * effect,
+        operation === "Offline"
+          ? 0
+          : demand + (degraded ? 34 : 0) + 64 * effect,
         slowLoad,
         53 + 10 * Math.sin(minutes / 1200 + phase),
         capacity,
@@ -212,7 +219,7 @@ export function createSampler(
       routes: networkRoutes(route, liveAt - startedAt),
       history,
       markers: Object.freeze(
-        episodeMarkers.filter(
+        [...episodeMarkers, ...liveMarkers()].filter(
           (marker) => marker.at >= firstAt && marker.at <= minuteAt,
         ),
       ),

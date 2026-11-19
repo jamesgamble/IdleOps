@@ -30,7 +30,9 @@ test("serves six screens from a nested path and keeps one session through naviga
   await expect(main.getByRole("heading", { level: 1 })).toHaveText(
     "Command Center",
   );
-  await expect(page.getByText("Static preview")).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Enterprise scorecard" }),
+  ).toBeVisible();
   const startedAt = await main.locator("time").getAttribute("datetime");
   expect(startedAt).toBeTruthy();
   await page.clock.setFixedTime(new Date(start.getTime() + 61000));

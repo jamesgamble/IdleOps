@@ -25,7 +25,9 @@ test("tracks a resource across inventory, architecture and command center", asyn
   await page.screenshot({ path: info.outputPath("inventory.png") });
   await page.getByRole("button", { name: "Architecture", exact: true }).click();
   await page.getByLabel("Focus resource").selectOption("res-nyc-desk");
-  const node = page.getByRole("button", { name: "PULSE-15 Critical" });
+  const node = page
+    .getByRole("region", { name: "Resource dependency diagram" })
+    .getByRole("button", { name: "PULSE-15 Critical", exact: true });
   await expect(node).toBeVisible();
   await node.click();
   await expect(

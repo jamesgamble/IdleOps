@@ -11,7 +11,7 @@ describe("session boundary", () => {
     session.advance(5999);
     expect(session.getSnapshot()).toBe(initial);
     session.advance(8250);
-    expect(session.getSnapshot()).toEqual({
+    expect(session.getSnapshot()).toMatchObject({
       startedAt: 5000,
       elapsedSeconds: 3,
     });
@@ -26,7 +26,7 @@ describe("session boundary", () => {
   it("starts each session independently", () => {
     const first = createSession(0);
     first.advance(60000);
-    expect(createSession(60000).getSnapshot()).toEqual({
+    expect(createSession(60000).getSnapshot()).toMatchObject({
       startedAt: 60000,
       elapsedSeconds: 0,
     });

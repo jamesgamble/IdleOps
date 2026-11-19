@@ -11,6 +11,7 @@
   --green: #96e5a7;
   --amber: #efbd72;
   --red: #ff8785;
+  --gray: var(--dim);
   --mono:
     ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font:

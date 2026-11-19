@@ -1,11 +1,9 @@
 # Product and architecture
 
-IdleOps simulates the operations dashboard a systems engineer might keep open. Its value comes from believable relationships between fictional events. A simulated service incident, for example, could affect that service's status, metrics, and log entries together.
+[Product Design & Requirements Handoff v1.0](design-handoff-v1.md) is the approved specification. Its 18 sections and AC-01 through AC-20 govern the first release. [Development roadmap](roadmap.md) maps delivery, verification and open decisions. Resolve discrepancies with the Product Owner before changing either scope or behavior.
 
-The application must be deliverable as static files and operate entirely in a modern desktop browser. UI controls may change simulated state. A lightweight shared simulation layer supplies the views. Storage is limited to harmless preferences. Layouts should adapt to available space and simulated activity must keep CPU and memory use modest.
+IdleOps is an entirely local, silent simulation of Axiom Industries' operations. Visual impact, believable behavior and interactive investigation have equal weight. A single fictional environment powers Command Center, Infrastructure, Networking, Security, Event Console and Settings. The persistent simulation indicator, startup and About identify IdleOps explicitly.
 
-## Decisions
+Model 30–50 detailed resources across five sites and two fictional clouds. Enterprise totals separately represent a larger estate. Incidents, alerts, weighted health, topology, actions, terminal output and the last 500 log entries describe the same conditions. Fixed 24-hour charts start populated; resolved incident timelines survive log eviction. Only harmless preferences survive a reload.
 
-- GitHub Issues record approved product behavior and milestones organize release work.
-- Framework, build tooling, first-release feature scope, and visual design await approved implementation requirements.
-- Hostinger is provisional. Verify a static deployment and recovery method before connecting production hosting.
+The app ships as static assets, with no real operational controls, runtime services, credentials or external telemetry. Desktop and ultrawide screens are the release targets. Build incrementally; all screens and the baseline interactions specified in the handoff are in the first release. Hostinger remains provisional and public deployment requires explicit approval.

@@ -83,7 +83,34 @@ test("tracks circuit failover across Networking, Infrastructure and Command Cent
   await expect(drawer.getByText("650.0 Mbps", { exact: true })).toBeVisible();
   await drawer.getByRole("button", { name: "Close" }).click();
   await page.getByRole("button", { name: "Geographic", exact: true }).click();
-  await page.screenshot({ path: info.outputPath("network-geographic.png") });
+  await expect(scene.locator("path.net-land")).toBeVisible();
+  const screenshot = await page.screenshot({
+    path: info.outputPath("network-geographic.png"),
+  });
+  // Count the land fill in the actual screenshot, including the first frame after switching views.
+  const landPixels = await page.evaluate(async (png) => {
+    const image = new Image();
+    image.src = `data:image/png;base64,${png}`;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Screenshot canvas unavailable");
+    ctx.drawImage(image, 0, 0);
+    const rgba = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let land = 0;
+    for (let index = 0; index < rgba.length; index += 4) {
+      if (
+        rgba[index] === 24 &&
+        rgba[index + 1] === 52 &&
+        rgba[index + 2] === 56
+      )
+        land++;
+    }
+    return land;
+  }, screenshot.toString("base64"));
+  expect(landPixels).toBeGreaterThan(10000);
   const tampa = page.getByRole("button", {
     name: "Inspect Tampa",
     exact: true,

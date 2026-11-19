@@ -20,6 +20,12 @@
 .ops-map .network-map .net-scene {
   height: clamp(180px, 22vh, 350px);
 }
+.net-land {
+  fill: #183438;
+  stroke: #386367;
+  stroke-width: 0.8px;
+  pointer-events: none;
+}
 .net-zone {
   fill: #112527;
   fill-opacity: 0.7;

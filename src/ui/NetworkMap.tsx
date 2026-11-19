@@ -1,5 +1,5 @@
 import { useRef, useState } from "preact/hooks";
-import coast from "../assets/north-atlantic.svg";
+import landOutline from "../assets/north-atlantic.path.txt?raw";
 import type { NetworkLink, Resource, Site } from "../simulation/model";
 import type { RouteReading } from "../simulation/network";
 import type { SimulationSnapshot } from "../simulation/session";
@@ -222,7 +222,7 @@ export function NetworkMap({
         }}
       >
         {geo ? (
-          <image href={coast} width="900" height="340" />
+          <path class="net-land" d={landOutline} />
         ) : (
           columns.map((id, i) => (
             <g key={id}>

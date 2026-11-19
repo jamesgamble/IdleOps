@@ -1,4 +1,5 @@
 import { catalog } from "./catalog";
+import { episodeAt } from "./episodes";
 import {
   createHealthSelector,
   type EnterpriseHealth,
@@ -150,6 +151,16 @@ export function createSampler(
         ? (resolved - at) / (resolved - recovery)
         : 0;
     const pathHealth = disrupted ? outage : normal;
+    const episode = episodeAt(at - startedAt, seed);
+    const resourceHealth = episode
+      ? {
+          ...conditions.resourceHealth,
+          [episode.resourceId]:
+            episode.stage === "critical"
+              ? ("Critical" as const)
+              : ("Degraded" as const),
+        }
+      : conditions.resourceHealth;
     const minutes = at / MINUTE;
     const daily = 9 * Math.sin((minutes * 2 * Math.PI) / 1440 + seedPhase);
     const readings: Partial<Record<ResourceId, Reading>> = {};
@@ -171,16 +182,13 @@ export function createSampler(
         (degraded && resource.threshold.metric === "responseMs"
           ? resource.threshold.degraded
           : 0) +
-          effect * 150,
+          effect * 150 +
+          (episode?.resourceId === resource.id ? episode.delayMs : 0),
       );
       readings[resource.id] = reading;
       measurements[resource.id] = reading[resource.threshold.metric];
     }
-    const health = scoreHealth(
-      conditions.resourceHealth,
-      pathHealth,
-      measurements,
-    );
+    const health = scoreHealth(resourceHealth, pathHealth, measurements);
     const current: Sample = Object.freeze({
       at,
       resources: Object.freeze(readings),

@@ -1,8 +1,8 @@
 import { catalog } from "./catalog";
-import { episodeAt, type Severity } from "./episodes";
+import type { Severity } from "./episodes";
 import type { LinkId } from "./model";
 import { type Conditions, freezeFixture, type ResourceId } from "./model";
-import { circuitScenario } from "./network";
+import type { createOperationalScenario } from "./operations";
 import type { ScenarioSeed } from "./scenario";
 import { MINUTE, type Telemetry } from "./telemetry";
 
@@ -43,6 +43,7 @@ export function createJournal(
   seed: ScenarioSeed,
   markers: Telemetry["markers"],
   notices: Conditions["alerts"],
+  scenario: ReturnType<typeof createOperationalScenario>,
 ) {
   const logs: LogEntry[] = [];
   let sequence = 0;
@@ -50,7 +51,7 @@ export function createJournal(
   const acknowledgedNoticeIds = new Set<string>();
   let current: Incident | undefined;
   const active = new Map<string, Incident>();
-  const route = circuitScenario(seed);
+  const route = scenario.circuit;
   const circuitId = `${seed}-live-circuit`;
   let transitionIndex = 0;
   function record(event: Event) {
@@ -130,6 +131,20 @@ export function createJournal(
     current = undefined;
   }
   return {
+    operation(event: Event) {
+      const entry = record(event);
+      const incident = event.incidentId && incidents.get(event.incidentId);
+      if (incident) {
+        const next = Object.freeze({
+          ...incident,
+          timeline: Object.freeze([...incident.timeline, entry]),
+        });
+        incidents.set(next.id, next);
+        if (active.has(next.id)) active.set(next.id, next);
+        if (current?.id === next.id) current = next;
+      }
+      return publish();
+    },
     advance(now: number) {
       const tick = Math.floor((now - start) / 10_000);
       if (tick <= cursor) return published;
@@ -158,7 +173,7 @@ export function createJournal(
         }
         const elapsed = i * 10_000;
         const at = start + elapsed;
-        const episode = episodeAt(elapsed, seed);
+        const episode = scenario.episode(elapsed);
         if (current && current.id !== episode?.id) resolve(at);
         if (
           episode &&

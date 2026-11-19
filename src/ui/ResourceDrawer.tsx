@@ -3,6 +3,7 @@ import { dashboard, utc } from "../simulation/dashboard";
 import type { Resource } from "../simulation/model";
 import type { SimulationSnapshot } from "../simulation/session";
 import type { Sample } from "../simulation/telemetry";
+import { OperationControls } from "./OperationControls";
 import { Trend } from "./Trend";
 
 const configLabels: Record<string, string> = {
@@ -150,15 +151,7 @@ export function ResourceDrawer({
       ) : (
         <p>No retained events.</p>
       )}
-      <h3>Simulated actions</h3>
-      <dl class="facts">
-        {resource.actions.map((a) => (
-          <div key={a}>
-            <dt>{a.replaceAll("-", " ")}</dt>
-            <dd>{a === "inspect" ? "Open" : "Preview only"}</dd>
-          </div>
-        ))}
-      </dl>
+      <OperationControls resource={resource} snapshot={snapshot} />
     </dialog>
   );
 }

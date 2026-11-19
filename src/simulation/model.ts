@@ -70,7 +70,8 @@ type Action =
   | "check-health"
   | "restart-service"
   | "diagnose-link"
-  | "run-maintenance";
+  | "run-maintenance"
+  | "apply-update";
 
 export interface Profile {
   readonly configuration: Configuration;

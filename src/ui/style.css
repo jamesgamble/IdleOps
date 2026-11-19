@@ -576,3 +576,29 @@ footer {
     height: auto;
   }
 }
+
+.operation-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block: 6px;
+}
+.operation-controls button,
+.incident-history button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 6px 9px;
+}
+.operation-controls button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+.operation-controls small {
+  color: var(--muted);
+}
+.operation-controls [role="status"],
+.resolution-notice {
+  color: var(--cyan);
+}

@@ -3,6 +3,7 @@ import { utc } from "../simulation/dashboard";
 import type { Health, NetworkLink, Site } from "../simulation/model";
 import type { RouteReading } from "../simulation/network";
 import type { SimulationSnapshot } from "../simulation/session";
+import { OperationControls } from "./OperationControls";
 
 export function siteHealth(snapshot: SimulationSnapshot, site: Site): Health {
   const resources = snapshot.catalog.resources.filter(
@@ -23,6 +24,7 @@ function LinkDetails({
   route: RouteReading;
   snapshot: SimulationSnapshot;
 }) {
+  const endpoint = snapshot.catalog.resources.find((r) => r.id === link.from);
   const active = route.selected?.id === link.id;
   const state = snapshot.telemetry.current.pathHealth[link.id] ?? "Healthy";
   const name = (id: string) =>
@@ -52,6 +54,13 @@ function LinkDetails({
           </div>
         ))}
       </dl>
+      {endpoint && (
+        <OperationControls
+          resource={endpoint}
+          snapshot={snapshot}
+          actions={["diagnose-link", "run-maintenance"]}
+        />
+      )}
       <h3>Recent circuit events</h3>
       <EventList
         snapshot={snapshot}
@@ -96,9 +105,7 @@ function RegionDetails({
     (r) => ids.has(r.primary.from) || ids.has(r.primary.to),
   );
   const upstream = [...new Set(resources.flatMap((r) => r.dependsOn))];
-  const diagnostics = [...new Set(resources.flatMap((r) => r.actions))].filter(
-    (a) => a === "diagnose-link" || a === "check-health",
-  );
+  const router = resources.find((r) => r.configuration.kind === "router");
   return (
     <>
       <p>
@@ -150,11 +157,13 @@ function RegionDetails({
           ids.has(e.resourceId) || routes.some((r) => r.primary.id === e.linkId)
         }
       />
-      <h3>Diagnostics</h3>
-      <p>
-        {diagnostics.map((a) => a.replaceAll("-", " ")).join(" · ")} · Preview
-        only
-      </p>
+      {router && (
+        <OperationControls
+          snapshot={snapshot}
+          resource={router}
+          actions={["check-health", "diagnose-link"]}
+        />
+      )}
     </>
   );
 }
